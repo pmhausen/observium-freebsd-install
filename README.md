@@ -19,7 +19,7 @@ Make sure DNS and NTP are configured correctly and working.
 
 ### Install required packages
 
-Configure `pkg` to use "latest" instead of "quartely" repository:
+Configure `pkg` to use "latest" instead of "quarterly" repository:
 
 ```sh
 mkdir -p /usr/local/etc/pkg/repos
