@@ -84,7 +84,8 @@ Create `/opt/observium/config.php` with this content:
 ```php
 <?php
 
-$config['db_host']                   = '127.0.0.1';
+$config['db_host']                   = 'localhost';
+$config['db_socket']                 = '/var/run/mysql/mysql.sock';
 $config['db_name']                   = 'observium';
 $config['db_user']                   = 'observium';
 $config['db_pass']                   = '<db password>';
@@ -92,8 +93,6 @@ $config['db_pass']                   = '<db password>';
 // End config.php
 ?>
 ```
-
-Using `127.0.0.1` instead of `localhost` works around FreeBSD and Observium assuming different locations for the local Unix domain socket. The perfomance impact is negligible.
 
 #### Initialise the database:
 

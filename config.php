@@ -5,7 +5,8 @@
 ## It's recommended that settings are edited in the web interface at /settings/ on your observium installation.
 ## Authentication and Database settings must be hardcoded here because they need to work before you can reach the web-based configuration interface
 
-$config['db_host']                   = '127.0.0.1';
+$config['db_host']                   = 'localhost';
+$config['db_socket']                 = '/var/run/mysql/mysql.sock';
 $config['db_name']                   = 'observium';
 $config['db_user']                   = 'observium';
 $config['db_pass']                   = '<db password>';
