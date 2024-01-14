@@ -69,8 +69,7 @@ fetch http://www.observium.org/observium-community-latest.tar.gz
 tar xvfz observium-community-latest.tar.gz
 rm observium-community-latest.tar.gz
 chown -R root:wheel observium
-mkdir observium/rrd observium/logs
-mkdir observium/rrd observium/rrd
+mkdir observium/logs observium/rrd
 chown www:www observium/rrd
 ```
 
