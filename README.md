@@ -24,6 +24,8 @@ Configure `pkg` to use "latest" instead of "quarterly" repository:
 ```sh
 mkdir -p /usr/local/etc/pkg/repos
 echo 'FreeBSD: { url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest" }' >/usr/local/etc/pkg/repos/FreeBSD.conf
+pkg upgrade -y
+pkg autoremove -y
 ```
 
 Install packages:
