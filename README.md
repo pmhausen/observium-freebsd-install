@@ -1,17 +1,16 @@
 # observium-freebsd-install
 
-Manual installation of Observium on FreeBSD. This is aiming to provide a complete production ready setup. It might get used to create an up to date port later.
+Manual installation of Observium on FreeBSD. This is aiming to provide a complete production ready setup.
 
-## Prerequisites
+## General considerations
 
-I assume a dedicated machine or jail for Observium. I'll follow the [Debian 12 instructions'](https://docs.observium.org/install_debian/#manual-installation) lead and use the easy way for this first PoC:
-
+- a dedicated machine or jail for Observium
 - Apache 2.4 and mod_php for PHP execution
 - cron jobs run as root
 - all required third party software installed as packages
 - keep the default install location of `/opt/observium`
 
-Additionally I assume you are working from a **root** shell. No `sudo` for each command as seems to be preferred in Debian or Ubuntu based howtos. Use SSH login to root (I like to follow Ubuntu and set `PermitRootLogin prohibit-password` for that) or use `su -` or `sudo -s` as you prefer.
+Additionally this guide assumes you are working from a **root** shell. No `sudo` for each command as seems to be preferred in Debian or Ubuntu based howtos, because `sudo` is not part of the FreeBSD base system. Use SSH login to root (following Ubuntu and setting `PermitRootLogin prohibit-password` for that) or use `su -` or `sudo -s` as preferred.
 
 ## Installation
 
@@ -19,7 +18,7 @@ Make sure DNS and NTP are configured correctly and working.
 
 ### Install required packages
 
-Configure `pkg` to use "latest" instead of "quarterly" repository:
+#### Configure `pkg` to use "latest" instead of "quarterly" repository:
 
 ```sh
 mkdir -p /usr/local/etc/pkg/repos
@@ -28,7 +27,7 @@ pkg upgrade -y
 pkg autoremove -y
 ```
 
-Install packages:
+#### Install packages:
 
 ```sh
 pkg install ImageMagick7 fping git-tiny graphviz ipmitool mariadb1011-server mtr-nox11 nagios-plugins net-snmp nmap php82 mod_php82 php82-bcmath php82-ctype php82-curl php82-filter php82-gd php82-mbstring php82-mysqli php82-posix php82-session php82-pear-Services_JSON php82-pecl-APCu php82-pecl-mcrypt python py39-pymysql rancid3 rrdtool
@@ -77,7 +76,7 @@ chown www:www observium/rrd
 
 ### Configure and initialise Observium database
 
-*[Complete sample config](config.php)*
+*[Complete separate config file](config.php)*
 
 #### Configure Observium
 
@@ -105,7 +104,7 @@ cd /opt/observium
 
 ### Configure Observium 3rd party tools paths
 
-*[Complete sample config](config.php)*
+*[Complete separate config file](config.php)*
 
 FreeBSD installs optional packages into the `/usr/local` hierarchy. So we need to adjust the default paths of more or less every single external tool.
 
@@ -189,7 +188,7 @@ Create `/usr/local/etc/apache24/Includes/observium.conf` with [this content](obs
 </VirtualHost>
 ```
 
-You need some FQDN to access the application, possibly internal. I use Caddy as an SSL reverse proxy for all applications so Apache serves plain HTTP only. For this PoC we'll leave it at plain HTTP first, then add Caddy later.
+You need some FQDN to access the application, possibly internal. Enabling SSL either via reverse proxy or in Apache is not covered in this guide.
 
 #### Add `/usr/local` paths to Apache runtime environment
 
@@ -201,7 +200,7 @@ echo 'PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"' >/usr
 
 #### Add FQDN to Observium configuration
 
-*[Complete sample config](config.php)*
+*[Complete separate config file](config.php)*
 
 Add this to `/opt/observium/config.php`:
 
@@ -229,52 +228,10 @@ Go to `http://<your FQDN>` as configured in the steps above, login with the admi
 
 You can now add devices.
 
-### Caddy SSL reverse proxy (optional)
-
-Caddy provides fully automated handling of SSL/HTTPS and Letsencrypt certificates. So if this is an installation that is publicly reachable, enabling SSL is more or less mandatory. Caddy is so much superior as a reverse proxy compared to Apache or even NginX that I prefer to run a separate process for SSL.
-
-#### Install and enable Caddy
-
-```sh
-pkg install caddy
-sysrc caddy_enable=YES
-```
-
-#### Configure Caddy
-
-Place this into `/usr/local/etc/caddy/Caddyfile`:
-
-```caddy
-<your FQDN> {
-  reverse_proxy * {
-    to http://127.0.0.1
-  }
-}
-```
-
-#### Tell Observium to use HTTPS
-
-In `/opt/observium/config.php` change this:
-
-```php
-$config['base_url']                  = 'http://<your FQDN>';
-```
-
-to this:
-
-```php
-$config['base_url']                  = 'https://<your FQDN>';
-```
-
-#### Start Caddy
-
-```sh
-service caddy start
-```
 
 ### Rancid integration (optional)
 
-Configuring Rancid is beyond the scope of this document but since the database paths are FreeBSD specific I'll add the necessary configuration of Observium here.
+Configuring Rancid is beyond the scope of this document but since the database paths are FreeBSD specific they are added here for completeness.
 
 Assuming you have a single group in Rancid named `observium`:
 
@@ -284,12 +241,66 @@ LIST_OF_GROUPS="observium"; export LIST_OF_GROUPS
 
 then add this to `/opt/observium/config.php`:
 
-*[Complete sample config](config.php)*
+*[Complete separate config file](config.php)*
 
 ```php
 $config['rancid_configs'][]          = "/usr/local/var/rancid/observium/configs/";
 $config['rancid_version']            = "3";
 $config['rancid_ignorecomments']     = 0;
+```
+
+## FreeBSD as a monitored system
+
+FreeBSD comes with its own SNMP server `bsnmpd` but the more common net-snmp package is better supported and offers some extension features we will use.
+
+### Install the Observium distro script
+
+```sh
+fetch -o /usr/local/sbin/distro https://raw.githubusercontent.com/observium/distroscript/master/distro
+chmod 755 /usr/local/sbin/distro
+```
+
+### Install and configure net-snmp
+
+#### Install package
+
+```sh
+pkg install net-snmp
+```
+
+#### Configure snmpd
+
+Create the file `/usr/local/etc/snmpd.conf` with this content:
+
+*[Complete separate config file](snmpd.conf)*
+
+```plaintext
+agentAddress    udp:161
+
+view            all     included    .1
+rocommunity     public  default     -V all
+
+includeAllDisks 10%
+
+sysLocation     <your system location>
+sysContact      <your system contact>
+
+# http://oid-info.com/get/1.3.6.1.2.1.1.7
+sysServices     72
+
+#  https://docs.observium.org/device_linux
+extend          .1.3.6.1.4.1.2021.7890.1 distro     /usr/local/sbin/distro
+extend          .1.3.6.1.4.1.2021.7890.2 hardware   /bin/kenv smbios.planar.product
+extend          .1.3.6.1.4.1.2021.7890.3 vendor     /bin/kenv smbios.planar.maker
+extend          .1.3.6.1.4.1.2021.7890.4 serial     /bin/kenv smbios.planar.serial
+```
+
+#### Enable and start net-snmpd
+
+```sh
+sysrc snmpd_enable=YES
+echo 'snmpd_conffile="/usr/local/etc/snmpd.conf"' >/etc/rc.conf.d/snmpd
+service snmpd start
 ```
 
 ---
