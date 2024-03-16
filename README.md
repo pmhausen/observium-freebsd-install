@@ -18,7 +18,7 @@ Make sure DNS and NTP are configured correctly and working.
 
 ### Install required packages
 
-#### Configure `pkg` to use "latest" instead of "quarterly" repository:
+#### Configure `pkg` to use "latest" instead of "quarterly" repository
 
 ```sh
 mkdir -p /usr/local/etc/pkg/repos
@@ -27,7 +27,7 @@ pkg upgrade -y
 pkg autoremove -y
 ```
 
-#### Install packages:
+#### Install packages
 
 ```sh
 pkg install ImageMagick7 fping git-tiny graphviz ipmitool mariadb1011-server mtr-nox11 nagios-plugins net-snmp nmap php82 mod_php82 php82-bcmath php82-ctype php82-curl php82-filter php82-gd php82-mbstring php82-mysqli php82-posix php82-session php82-pear-Services_JSON php82-pecl-APCu php82-pecl-mcrypt python py39-pymysql rancid3 rrdtool
@@ -35,14 +35,14 @@ pkg install ImageMagick7 fping git-tiny graphviz ipmitool mariadb1011-server mtr
 
 ### Enable and start MariaDB and create the database
 
-#### Enable the database server:
+#### Enable the database server
 
 ```sh
 sysrc mysql_enable=YES
 service mysql-server start
 ```
 
-#### Create database and database user:
+#### Create database and database user
 
 ```sql
 mysql
@@ -95,7 +95,7 @@ $config['db_pass']                   = '<db password>';
 ?>
 ```
 
-#### Initialise the database:
+#### Initialise the database
 
 ```sh
 cd /opt/observium
@@ -131,13 +131,13 @@ $config['rrdcached']                 = "unix:/var/run/rrdcached.sock";
 
 ### Add Observium cron jobs
 
-#### Edit root's crontab:
+#### Edit root's crontab
 
 ```sh
 crontab -e
 ```
 
-#### Add this:
+#### Add cron jobs
 
 ```sh
 # Run a complete discovery of all devices once every 6 hours
@@ -227,7 +227,6 @@ cd /opt/observium
 Go to `http://<your FQDN>` as configured in the steps above, login with the admin user just created.
 
 You can now add devices.
-
 
 ### Rancid integration (optional)
 
