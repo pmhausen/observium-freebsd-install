@@ -120,11 +120,15 @@ $config['snmpgetnext']               = "/usr/local/bin/snmpgetnext";
 $config['snmpbulkget']               = "/usr/local/bin/snmpbulkget";
 $config['snmpbulkwalk']              = "/usr/local/bin/snmpbulkwalk";
 $config['snmptranslate']             = "/usr/local/bin/snmptranslate";
-$config['whois']                     = "/usr/bin/whois";
 $config['mtr']                       = "/usr/local/sbin/mtr";
 $config['nmap']                      = "/usr/local/bin/nmap";
 $config['ipmitool']                  = "/usr/local/bin/ipmitool";
 $config['git']                       = "/usr/local/bin/git";
+$config['dot']                       = "/usr/local/bin/dot";
+$config['unflatten']                 = "/usr/local/bin/unflatten";
+$config['neato']                     = "/usr/local/bin/neato";
+$config['sfdp']                      = "/usr/local/bin/sfdp";
+
 $config['nagplug_dir']               = "/usr/local/libexec/nagios";
 $config['rrdcached']                 = "unix:/var/run/rrdcached.sock";
 ```
