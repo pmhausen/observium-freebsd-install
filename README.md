@@ -298,7 +298,9 @@ extend          .1.3.6.1.4.1.2021.7890.3 vendor     /bin/kenv smbios.planar.make
 extend          .1.3.6.1.4.1.2021.7890.4 serial     /bin/kenv smbios.planar.serial
 ```
 
-For a Raspberry Pi running FreeBSD replace the last four lines with these instead:
+Depending on the system you might want to replace `planar` with `system` in the lines above. Just try the commands interactively.
+
+For a Raspberry Pi running FreeBSD replace the last four lines with these three instead:
 
 ```plaintext
 extend          .1.3.6.1.4.1.2021.7890.1 distro     /usr/local/sbin/distro
