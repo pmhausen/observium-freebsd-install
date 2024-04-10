@@ -305,6 +305,7 @@ service snmpd start
 ### SNMP configuration
 
 For a Raspberry Pi running FreeBSD follow the FreeBSD section above but in `/usr/local/etc/snmpd.conf` replace the four `extend` lines with these three instead:
+
 (There is no useful "vendor" information to be gathered from the device itself.)
 
 ```plaintext
@@ -361,7 +362,7 @@ service inetd start
 
 #### Restrict access to the agent (optional)
 
-Place this in /etc/hosts.allow - at the top right before the `ALL : ALL : allow` line:
+Place this in `/etc/hosts.allow` - at the top right before the `ALL : ALL : allow` line:
 
 ```plaintext
 observium-rpi-agent : <IP address of your Observium host> : allow
