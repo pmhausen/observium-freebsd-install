@@ -4,6 +4,12 @@ Manual installation of [Observium](http://www.observium.org) on FreeBSD. Observi
 
 This document is aiming to provide a complete production ready setup.
 
+Updating the FreeBSD port was a thing I discussed with various people but the main obstacle is the fact that Observium has got particular installation paths hardcoded so making it adhere to FreeBSD filesystem hierarchy standards would involve creating and maintaining a ton of patches.
+
+Also customers with a commercial ("professional" or "enterprise" edition) license install and update Observium by checking out directly from the developers' SVN repository.
+
+So a port does not really make sense. I created these - hopefully complete and correct - instructions instead.
+
 ## General considerations
 
 - a dedicated machine or jail for Observium
