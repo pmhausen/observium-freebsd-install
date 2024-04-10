@@ -236,6 +236,8 @@ You can now add devices.
 
 ### Rancid integration (optional)
 
+[Rancid](https://shrubbery.net/rancid/) is a tool to automatically poll routers, switches and similar devices for configuration changes and put these changes into some version control system like SVN or git.
+
 Configuring Rancid is beyond the scope of this document but since the database paths are FreeBSD specific they are added here for completeness.
 
 Assuming you have a single group in Rancid named `observium`:
