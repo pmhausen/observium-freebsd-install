@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# close standard input (for security reasons) and stderr
+if [ "$1" = -d ]
+then
+    set -xv
+else
+    exec <&- 2>/dev/null
+fi
+
+echo '<<<Observium>>>'
+echo 'Version: 1.0.0'
+echo "AgentOS: $(/usr/bin/uname -o)"
+
+echo '<<<raspberrypi>>>'
+echo "clock-core: $(/sbin/sysctl -n dev.cpu.0.freq)"
+echo "temp: $(/sbin/sysctl -n dev.cpu.0.temperature)"
+
+exit 0

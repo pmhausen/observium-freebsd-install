@@ -1,6 +1,8 @@
 # observium-freebsd-install
 
-Manual installation of Observium on FreeBSD. This is aiming to provide a complete production ready setup.
+Manual installation of [Observium](http://www.observium.org) on FreeBSD. Observium is an advanced auto discovering network management system centred around SNMP.
+
+This document is aiming to provide a complete production ready setup.
 
 ## General considerations
 
@@ -76,8 +78,6 @@ chown www:www observium/rrd
 
 ### Configure and initialise Observium database
 
-*[Complete separate config file](config.php)*
-
 #### Configure Observium
 
 Create `/opt/observium/config.php` with this content:
@@ -103,8 +103,6 @@ cd /opt/observium
 ```
 
 ### Configure Observium 3rd party tools paths
-
-*[Complete separate config file](config.php)*
 
 FreeBSD installs optional packages into the `/usr/local` hierarchy. So we need to adjust the default paths of more or less every single external tool.
 
@@ -204,8 +202,6 @@ echo 'PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"' >/usr
 
 #### Add FQDN to Observium configuration
 
-*[Complete separate config file](config.php)*
-
 Add this to `/opt/observium/config.php`:
 
 ```php
@@ -244,8 +240,6 @@ LIST_OF_GROUPS="observium"; export LIST_OF_GROUPS
 
 then add this to `/opt/observium/config.php`:
 
-*[Complete separate config file](config.php)*
-
 ```php
 $config['rancid_configs'][]          = "/usr/local/var/rancid/observium/configs/";
 $config['rancid_version']            = "3";
@@ -275,8 +269,6 @@ pkg install net-snmp
 
 Create the file `/usr/local/etc/snmpd.conf` with this content:
 
-*[Complete separate config file](snmpd.conf)*
-
 ```plaintext
 agentAddress    udp:161
 
@@ -298,15 +290,7 @@ extend          .1.3.6.1.4.1.2021.7890.3 vendor     /bin/kenv smbios.planar.make
 extend          .1.3.6.1.4.1.2021.7890.4 serial     /bin/kenv smbios.planar.serial
 ```
 
-Depending on the system you might want to replace `planar` with `system` in the lines above. Just try the commands interactively.
-
-For a Raspberry Pi running FreeBSD replace the last four lines with these three instead:
-
-```plaintext
-extend          .1.3.6.1.4.1.2021.7890.1 distro     /usr/local/sbin/distro
-extend          .1.3.6.1.4.1.2021.7890.2 hardware   /sbin/sysctl -n hw.fdt.model
-extend          .1.3.6.1.4.1.2021.7890.4 serial     /sbin/sysctl -n hw.fdt.serial-number
-```
+Depending on the system you might want to replace `planar` with `system` in the lines above. Just try the commands interactively to find out which gives the most useful information.
 
 #### Enable and start net-snmpd
 
@@ -314,6 +298,74 @@ extend          .1.3.6.1.4.1.2021.7890.4 serial     /sbin/sysctl -n hw.fdt.seria
 sysrc snmpd_enable=YES
 echo 'snmpd_conffile="/usr/local/etc/snmpd.conf"' >/etc/rc.conf.d/snmpd
 service snmpd start
+```
+
+## Monitoring FreeBSD on a Raspberry Pi
+
+### SNMP configuration
+
+For a Raspberry Pi running FreeBSD follow the FreeBSD section above but in `/usr/local/etc/snmpd.conf` replace the four `extend` lines with these three instead:
+(There is no useful "vendor" information to be gathered from the device itself.)
+
+```plaintext
+extend          .1.3.6.1.4.1.2021.7890.1 distro     /usr/local/sbin/distro
+extend          .1.3.6.1.4.1.2021.7890.2 hardware   /sbin/sysctl -n hw.fdt.model
+extend          .1.3.6.1.4.1.2021.7890.4 serial     /sbin/sysctl -n hw.fdt.serial-number
+```
+
+### Linux / Raspberry Pi agent
+
+Observium comes with a Linux agent script that augments the data gathered by SNMP. It's too Linux-centric to be used unmodified but we can replace it with a short shell script of our own and feed core frequency and core temperature into Observium.
+
+#### Deploy the agent script
+
+Deploy this script as `/usr/local/sbin/observium-rpi-agent`:
+
+```sh
+#!/bin/sh
+
+# close standard input (for security reasons) and stderr
+if [ "$1" = -d ]
+then
+    set -xv
+else
+    exec <&- 2>/dev/null
+fi
+
+echo '<<<Observium>>>'
+echo 'Version: 1.0.0'
+echo "AgentOS: $(/usr/bin/uname -o)"
+
+echo '<<<raspberrypi>>>'
+echo "clock-core: $(/sbin/sysctl -n dev.cpu.0.freq)"
+echo "temp: $(/sbin/sysctl -n dev.cpu.0.temperature)"
+
+exit 0
+```
+
+Make it executable: `chmod 755 /usr/local/sbin/observium-rpi-agent`.
+
+#### Configure inetd
+
+```sh
+echo "observium-agent 36602/tcp #Observium Unix Agent" >>/etc/services
+echo "observium-agent stream tcp nowait nobody /usr/local/sbin/observium-rpi-agent observium-rpi-agent" >>/etc/inetd.conf
+```
+
+#### Enable and start inetd
+
+```sh
+sysrc inetd_enable=YES
+service inetd start
+```
+
+#### Restrict access to the agent (optional)
+
+Place this in /etc/hosts.allow - at the top right before the `ALL : ALL : allow` line:
+
+```plaintext
+observium-rpi-agent : <IP address of your Observium host> : allow
+observium-rpi-agent : ALL : deny
 ```
 
 ---
