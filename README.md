@@ -38,7 +38,7 @@ pkg autoremove -y
 #### Install packages
 
 ```sh
-pkg install ImageMagick7 fping git-tiny graphviz ipmitool mariadb1011-server mtr-nox11 nagios-plugins net-snmp nmap php82 mod_php82 php82-bcmath php82-ctype php82-curl php82-filter php82-gd php82-mbstring php82-mysqli php82-posix php82-session php82-pear-Services_JSON php82-pecl-APCu php82-pecl-mcrypt python py39-pymysql rancid3 rrdtool
+pkg install ImageMagick7-nox11 fping git-tiny graphviz ipmitool mariadb1011-server mtr-nox11 nagios-plugins net-snmp nmap php83 mod_php83 php83-bcmath php83-ctype php83-curl php83-filter php83-gd php83-mbstring php83-mysqli php83-posix php83-session php83-pear-Services_JSON php83-pecl-APCu php83-pecl-mcrypt python python3 py311-pymysql rancid3 rrdtool
 ```
 
 ### Enable and start MariaDB and create the database
